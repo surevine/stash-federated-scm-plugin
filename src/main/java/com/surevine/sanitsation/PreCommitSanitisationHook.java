@@ -134,7 +134,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         Path commitTempDir = createTempDir(repository, commit);
 
         for(Change change: changes.getValues()) {
-        	if(!change.getType().equals(ChangeType.DELETE)) {
+        	if(!ChangeType.DELETE.equals(change.getType())) {
             	Path tempChangedFile = createTempChangedFile(commitTempDir, repository, commit, change.getPath());
                 changedFiles.add(tempChangedFile);
         	}
