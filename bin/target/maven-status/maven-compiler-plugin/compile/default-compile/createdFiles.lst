@@ -1,0 +1,3 @@
+com/surevine/sanitsation/PreCommitSanitisationHook.class
+com/surevine/sanitsation/SanitisationArchiveWriter.class
+com/surevine/sanitsation/service/SanitisationServiceFacade.class
