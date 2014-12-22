@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.atlassian.stash.commit.CommitService;
 import com.atlassian.stash.content.Change;
+import com.atlassian.stash.content.ChangeType;
 import com.atlassian.stash.content.ChangesRequest;
 import com.atlassian.stash.content.Changeset;
 import com.atlassian.stash.content.ChangesetsBetweenRequest;
@@ -133,8 +134,10 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         Path commitTempDir = createTempDir(repository, commit);
 
         for(Change change: changes.getValues()) {
-        	Path tempChangedFile = createTempChangedFile(commitTempDir, repository, commit, change.getPath());
-            changedFiles.add(tempChangedFile);
+        	if(!change.getType().equals(ChangeType.DELETE)) {
+            	Path tempChangedFile = createTempChangedFile(commitTempDir, repository, commit, change.getPath());
+                changedFiles.add(tempChangedFile);
+        	}
         }
 
         return changedFiles;
