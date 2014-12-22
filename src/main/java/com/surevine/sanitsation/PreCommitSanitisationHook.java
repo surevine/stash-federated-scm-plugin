@@ -48,13 +48,12 @@ import java.nio.file.Paths;
 public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
     private static final Logger log = LoggerFactory.getLogger(PreCommitSanitisationHook.class);
+    private static final String WORKING_DIR = "sanitisation";
 
     private final ApplicationPropertiesService applicationPropertiesService;
     private final CommitService commitService;
     private final ContentService contentService;
     private final SanitisationArchiveWriter archiveWriter;
-
-    public static String WORKING_DIR = "sanitisation";
 
     public PreCommitSanitisationHook(
             ApplicationPropertiesService applicationPropertiesService,
@@ -99,7 +98,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
                 if(!SanitisationServiceFacade.getInstance().isSane(changedFilesArchive)) {
                     allCommitsSane = false;
-                    hookResponse.out().println(String.format("Commit %s(%s) failed sanitisation check.",
+                    hookResponse.out().println(String.format("Commit %s (%s) failed sanitisation check.",
                                                 commit.getDisplayId(),
                                                 commit.getAuthor().getName()));
                 }
@@ -113,6 +112,10 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
                                 changedFilesArchive.toString()));
                 }
             }
+        }
+
+        if(!allCommitsSane) {
+        	hookResponse.out().println("Push rejected as not all commits passed sanitisation.");
         }
 
         return allCommitsSane;
