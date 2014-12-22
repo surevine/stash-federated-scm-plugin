@@ -38,6 +38,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Hook to perform sanitisation on commits to configured repositories.
+ *
+ * @author jonnyheavey
+ *
+ */
 public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
     private static final Logger log = LoggerFactory.getLogger(PreCommitSanitisationHook.class);
