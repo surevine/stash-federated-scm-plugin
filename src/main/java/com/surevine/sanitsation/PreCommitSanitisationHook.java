@@ -96,11 +96,14 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 					return false;
 				}
 
-                if(!SanitisationServiceFacade.getInstance().isSane(changedFilesArchive)) {
+                SanitisationResult result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive);
+
+                if(!result.isSane()) {
                     allCommitsSane = false;
-                    hookResponse.out().println(String.format("Commit %s (%s) failed sanitisation check.",
+                    hookResponse.out().println(String.format("Commit %s (%s) failed sanitisation check: %s",
                                                 commit.getDisplayId(),
-                                                commit.getAuthor().getName()));
+                                                commit.getAuthor().getName(),
+                                                result.getOutput()));
                 }
 
                 deleteTempDir(context.getRepository(), commit);

@@ -2,9 +2,12 @@ package com.surevine.sanitsation.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -12,6 +15,8 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.surevine.sanitsation.SanitisationResult;
 
 /**
  * Interacts with community portal sanitisation service
@@ -50,7 +55,7 @@ public class SanitisationServiceFacade {
 	 * @param archiveToSanitise
 	 * @return
 	 */
-	public boolean isSane(Path archiveToSanitise) {
+	public SanitisationResult isSane(Path archiveToSanitise) {
 
 		log.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
 
@@ -59,22 +64,31 @@ public class SanitisationServiceFacade {
 		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		entity.addPart("archive", new FileBody(archive));
 
+		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
+
+		log.error("Requesting sanitisation: " + url);
+
+		SanitisationResult result = new SanitisationResult(archive, false, "");
+
 		try {
-			HttpResponse response = Request.Post(getConfig().getProperty("sanitisation.service.base.url") + "/sanitise")
+			HttpResponse response = Request.Post(url)
 										.body(entity)
 										.execute().returnResponse();
 
+			// Pass back any response from sanitisation service
+			String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+			result.setOutput(responseBody);
+
 			// Archive only considered 'sane' if service returns 200 OK
 			if(response.getStatusLine().getStatusCode() == SUCCESS) {
-				return true;
+				result.setSane(true);
 			}
 
 		} catch (IOException e) {
 			log.error("Failed to send archive to sanitisation service.", e);
 		}
 
-		return false;
-
+		return result;
 	}
 
 	private Properties getConfig() {
