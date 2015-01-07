@@ -13,6 +13,8 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +68,6 @@ public class SanitisationServiceFacade {
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
-		log.error("Requesting sanitisation: " + url);
-
 		SanitisationResult result = new SanitisationResult(archive, false, "");
 
 		try {
@@ -75,13 +75,23 @@ public class SanitisationServiceFacade {
 										.body(entity)
 										.execute().returnResponse();
 
-			// Pass back any response from sanitisation service
-			String responseBody = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-			result.setOutput(responseBody);
+			if(response.getStatusLine().getStatusCode() != SUCCESS) {
+				result.setSane(false);
+				result.setOutput("Sanitisation service failed.");
+				return result;
+			}
 
-			// Archive only considered 'sane' if service returns 200 OK
-			if(response.getStatusLine().getStatusCode() == SUCCESS) {
-				result.setSane(true);
+			// Parse response from sanitisation service
+			String responseString = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
+			JSONObject responseBody;
+			try {
+				responseBody = new JSONObject(responseString);
+				result.setSane((boolean) responseBody.get("safe"));
+				result.setOutput(responseBody.getString("message"));
+			} catch (JSONException e) {
+				result.setSane(false);
+				result.setOutput("Failed to parse sanitisation service response.");
+				return result;
 			}
 
 		} catch (IOException e) {
