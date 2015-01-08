@@ -35,6 +35,7 @@ import com.surevine.sanitsation.service.SanitisationServiceFacade;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -96,7 +97,16 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 					return false;
 				}
 
-                SanitisationResult result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive);
+                SanitisationResult result;
+				try {
+					result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive,
+																			context.getRepository().getProject().getKey(),
+																			context.getRepository().getSlug(),
+																			commit.getId());
+				} catch (UnsupportedEncodingException e1) {
+					log.error("Failed to sanitise archive.", e1);
+					return false;
+				}
 
                 if(!result.isSane()) {
                     allCommitsSane = false;

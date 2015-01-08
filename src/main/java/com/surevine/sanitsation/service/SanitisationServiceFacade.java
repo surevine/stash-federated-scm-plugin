@@ -2,7 +2,7 @@ package com.surevine.sanitsation.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -13,6 +13,7 @@ import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -56,8 +57,9 @@ public class SanitisationServiceFacade {
 	 * according to sanitisation service.
 	 * @param archiveToSanitise
 	 * @return
+	 * @throws UnsupportedEncodingException
 	 */
-	public SanitisationResult isSane(Path archiveToSanitise) {
+	public SanitisationResult isSane(Path archiveToSanitise, String projectKey, String repoSlug, String commitId) throws UnsupportedEncodingException {
 
 		log.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
 
@@ -65,6 +67,9 @@ public class SanitisationServiceFacade {
 
 		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		entity.addPart("archive", new FileBody(archive));
+		entity.addPart("projectKey", new StringBody(projectKey));
+		entity.addPart("repoSlug", new StringBody(repoSlug));
+		entity.addPart("commitId", new StringBody(commitId));
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
