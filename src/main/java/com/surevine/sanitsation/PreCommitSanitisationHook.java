@@ -78,55 +78,15 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         for (RefChange refChange : refChanges) {
 
             final ChangesetsBetweenRequest request = new ChangesetsBetweenRequest.Builder(context.getRepository())
-                .exclude(refChange.getFromHash())
-                .include(refChange.getToHash())
-                .build();
+																	                .exclude(refChange.getFromHash())
+																	                .include(refChange.getToHash())
+																	                .build();
 
             final Page<Changeset> commits = commitService.getChangesetsBetween(request, PageUtils.newRequest(0, 9999));
-
             for(Changeset commit: commits.getValues()) {
-
-                Set<Path> tempChangedFiles;
-                Path changedFilesArchive;
-                try {
-					tempChangedFiles = getChangedFiles(context.getRepository(), commit);
-					changedFilesArchive = archiveWriter.createArchive(tempChangedFiles);
-				} catch (IOException | ArchiveException | CompressorException e) {
-					log.error("Failed to create archive to sanitisation check.");
-					// Fail overall sanitisation check
-					return false;
-				}
-
-                SanitisationResult result;
-				try {
-					result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive,
-																			context.getRepository().getProject().getKey(),
-																			context.getRepository().getSlug(),
-																			commit.getId());
-				} catch (UnsupportedEncodingException e1) {
-					log.error("Failed to sanitise archive.", e1);
-					return false;
-				}
-
-                if(!result.isSane()) {
-                    allCommitsSane = false;
-
-                    hookResponse.out().println(String.format("Commit %s (%s) failed sanitisation check:",
-                                                commit.getDisplayId(),
-                                                commit.getAuthor().getName()));
-                    for(String error: result.getErrors()) {
-                    	hookResponse.out().println("Error: "+error.trim());
-                    }
-                }
-
-                deleteTempDir(context.getRepository(), commit);
-
-                try {
-                    Files.deleteIfExists(changedFilesArchive);
-                } catch (IOException e) {
-                    log.error(String.format("Failed to delete commit changed files archive (%s).",
-                                changedFilesArchive.toString()));
-                }
+            	if(!isCommitSane(commit, context, hookResponse)) {
+            		allCommitsSane = false;
+            	}
             }
         }
 
@@ -138,6 +98,45 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
     }
 
     /**
+     * Determines whether a commit is safe according to sanitisation service
+     * @param commit commit to be checked
+     * @param context repository context the comit belongs to
+     * @param hookResponse plugin response/output (for relaying messages to client)
+     * @return
+     */
+    private boolean isCommitSane(Changeset commit, RepositoryHookContext context, HookResponse hookResponse) {
+
+    	Set<Path> tempChangedFiles;
+        Path changedFilesArchive;
+        try {
+			tempChangedFiles = getChangedFiles(context.getRepository(), commit);
+			changedFilesArchive = archiveWriter.createArchive(tempChangedFiles);
+		} catch (IOException | ArchiveException | CompressorException e1) {
+			log.error("Failed to create archive to sanitisation check.", e1);
+			return false;
+		}
+
+        SanitisationResult result;
+		try {
+			result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive,
+																	context.getRepository().getProject().getKey(),
+																	context.getRepository().getSlug(),
+																	commit.getId());
+		} catch (UnsupportedEncodingException e2) {
+			log.error("Failed to sanitise archive.", e2);
+			return false;
+		}
+
+        tidyTempFiles(commit, context, changedFilesArchive);
+
+        if(!result.isSane()) {
+            printCommitErrors(hookResponse, commit, result);
+        }
+
+        return result.isSane();
+	}
+
+	/**
      * Retrieves set of files in a repository that were changed in a commit.
      * @param repository repository to check
      * @param commit commit that changed files
@@ -223,5 +222,38 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 			log.warn("Failed to delete temporary working directory during sanitisation check: " + tempFilesDir.toString());
 		}
     }
+
+    /**
+     * Print the sanitisation errors for the commit back to the Git client.
+     * @param hookResponse
+     * @param commit
+     * @param result
+     */
+	private void printCommitErrors(HookResponse hookResponse,
+			Changeset commit, SanitisationResult result) {
+		hookResponse.out().println(String.format("Commit %s (%s) failed sanitisation check:",
+		                            commit.getDisplayId(),
+		                            commit.getAuthor().getName()));
+		for(String error: result.getErrors()) {
+			hookResponse.out().println("Error: "+error.trim());
+		}
+	}
+
+	/**
+	 * Remove any temporary files created during sanitisation check
+	 * @param commit
+	 * @param context
+	 * @param changedFilesArchive
+	 */
+	private void tidyTempFiles(Changeset commit, RepositoryHookContext context,
+			Path changedFilesArchive) {
+		try {
+            deleteTempDir(context.getRepository(), commit);
+            Files.deleteIfExists(changedFilesArchive);
+        } catch (IOException e) {
+            log.error(String.format("Failed to delete commit changed files archive (%s).",
+                        changedFilesArchive.toString()));
+        }
+	}
 
 }

@@ -89,25 +89,12 @@ public class SanitisationServiceFacade {
 				return result;
 			}
 
-			// TODO move this into own function
-			// Parse response from sanitisation service
 			String responseString = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-			JSONObject responseBody;
 			try {
-
-				responseBody = new JSONObject(responseString);
-				result.setSane((boolean) responseBody.get("safe"));
-
-				JSONArray errorsArray = (JSONArray) responseBody.get("errors");
-				for(int i=0; i<errorsArray.length(); i++) {
-					String errorMessage = (String) errorsArray.get(i);
-					result.addError(errorMessage);
-				}
-
+				parseJSONResponse(result, responseString);
 			} catch (JSONException e) {
 				result.setSane(false);
 				result.addError("Failed to parse sanitisation service response.");
-				return result;
 			}
 
 		} catch (IOException e) {
@@ -119,6 +106,25 @@ public class SanitisationServiceFacade {
 
 	private Properties getConfig() {
 		return config;
+	}
+
+	/**
+	 * Parse JSON response from sanitisation service
+	 * @param result SanitisationResult to store parsed values in
+	 * @param responseString raw JSON string response
+	 * @throws JSONException
+	 */
+	private void parseJSONResponse(SanitisationResult result, String responseString) throws JSONException {
+		JSONObject responseBody;
+
+			responseBody = new JSONObject(responseString);
+			result.setSane((boolean) responseBody.get("safe"));
+
+			JSONArray errorsArray = (JSONArray) responseBody.get("errors");
+			for(int i=0; i<errorsArray.length(); i++) {
+				String errorMessage = (String) errorsArray.get(i);
+				result.addError(errorMessage);
+			}
 	}
 
 }
