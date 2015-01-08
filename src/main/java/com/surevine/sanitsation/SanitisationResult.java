@@ -1,6 +1,9 @@
 package com.surevine.sanitsation;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Represents the result of a sanitisation execution
@@ -11,12 +14,12 @@ public class SanitisationResult {
 
 	private File archive;
 	private boolean sane;
-	private String output;
+	private List<String> errors;
 
-	public SanitisationResult(File archive, boolean sane, String output) {
+	public SanitisationResult(File archive, boolean sane) {
 		this.archive = archive;
 		this.sane = sane;
-		this.output = output;
+		this.errors = new ArrayList<String>();
 	}
 
 	public File getArchive() {
@@ -31,12 +34,16 @@ public class SanitisationResult {
 		this.sane = sane;
 	}
 
-	public String getOutput() {
-		return output;
+	public List<String> getErrors() {
+		return errors;
 	}
 
-	public void setOutput(String output) {
-		this.output = output;
+	public void addError(String error) {
+		this.errors.add(error);
+	}
+
+	public void setErrors(List<String> errors) {
+		this.errors = errors;
 	}
 
 }

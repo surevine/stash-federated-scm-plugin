@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
@@ -14,6 +16,7 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -73,7 +76,7 @@ public class SanitisationServiceFacade {
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
-		SanitisationResult result = new SanitisationResult(archive, false, "");
+		SanitisationResult result = new SanitisationResult(archive, false);
 
 		try {
 			HttpResponse response = Request.Post(url)
@@ -82,20 +85,28 @@ public class SanitisationServiceFacade {
 
 			if(response.getStatusLine().getStatusCode() != SUCCESS) {
 				result.setSane(false);
-				result.setOutput("Sanitisation service failed.");
+				result.addError("Sanitisation service failed.");
 				return result;
 			}
 
+			// TODO move this into own function
 			// Parse response from sanitisation service
 			String responseString = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
 			JSONObject responseBody;
 			try {
+
 				responseBody = new JSONObject(responseString);
 				result.setSane((boolean) responseBody.get("safe"));
-				result.setOutput(responseBody.getString("message"));
+
+				JSONArray errorsArray = (JSONArray) responseBody.get("errors");
+				for(int i=0; i<errorsArray.length(); i++) {
+					String errorMessage = (String) errorsArray.get(i);
+					result.addError(errorMessage);
+				}
+
 			} catch (JSONException e) {
 				result.setSane(false);
-				result.setOutput("Failed to parse sanitisation service response.");
+				result.addError("Failed to parse sanitisation service response.");
 				return result;
 			}
 
