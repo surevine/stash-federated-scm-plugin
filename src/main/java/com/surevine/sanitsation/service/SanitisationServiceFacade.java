@@ -75,7 +75,7 @@ public class SanitisationServiceFacade {
 		entity.addPart("archive", new FileBody(archive));
 		entity.addPart("projectKey", new StringBody(projectKey));
 		entity.addPart("repoSlug", new StringBody(repoSlug));
-		entity.addPart("identifier", new StringBody(identifier));
+		entity.addPart("identifier", new StringBody("Commit-"+identifier));
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
