@@ -58,11 +58,14 @@ public class SanitisationServiceFacade {
 	/**
 	 * Confirms whether archive contents are valid/clean
 	 * according to sanitisation service.
-	 * @param archiveToSanitise
+	 * @param archiveToSanitise path to archive to sanitise
+	 * @param projectKey project the repository belongs to
+	 * @param repoSlug repository the archive of changes derive from
+	 * @param identifier String identifier to describe archive source
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public SanitisationResult isSane(Path archiveToSanitise, String projectKey, String repoSlug, String commitId) throws UnsupportedEncodingException {
+	public SanitisationResult isSane(Path archiveToSanitise, String projectKey, String repoSlug, String identifier) throws UnsupportedEncodingException {
 
 		log.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
 
@@ -72,7 +75,7 @@ public class SanitisationServiceFacade {
 		entity.addPart("archive", new FileBody(archive));
 		entity.addPart("projectKey", new StringBody(projectKey));
 		entity.addPart("repoSlug", new StringBody(repoSlug));
-		entity.addPart("commitId", new StringBody(commitId));
+		entity.addPart("identifier", new StringBody(identifier));
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
