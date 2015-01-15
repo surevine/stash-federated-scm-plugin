@@ -1,9 +1,9 @@
-<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="Sanitisation hook" plugins-version="2">
 
     <plugin-info>
-        <description>${project.description}</description>
+        <description>Sanitises commits to federated repositories to ensure they meet restrictions.</description>
         <version>${project.version}</version>
-        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <vendor name="Surevine" url="https://www.surevine.com" />
         <param name="plugin-icon">images/pluginIcon.png</param>
         <param name="plugin-logo">images/pluginLogo.png</param>
     </plugin-info>
