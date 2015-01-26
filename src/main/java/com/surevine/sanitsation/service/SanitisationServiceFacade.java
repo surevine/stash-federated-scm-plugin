@@ -34,6 +34,7 @@ public class SanitisationServiceFacade {
 
 	private static final Logger log = LoggerFactory.getLogger(SanitisationServiceFacade.class);
 	private static final int SUCCESS = 200;
+	private static final int NOT_FOUND = 404;
 
 	private static SanitisationServiceFacade _instance = null;
 
@@ -86,9 +87,19 @@ public class SanitisationServiceFacade {
 										.body(entity)
 										.execute().returnResponse();
 
-			if(response.getStatusLine().getStatusCode() != SUCCESS) {
+			int responseCode = response.getStatusLine().getStatusCode();
+
+			if(responseCode != SUCCESS) {
+
+				if(responseCode == NOT_FOUND) {
+					result.addError("Project not configured for sharing in management console.");
+				} else {
+					result.addError(String.format("Sanitisation service failed. %s: %s",
+							responseCode,
+							response.getStatusLine().getReasonPhrase()));
+				}
+
 				result.setSane(false);
-				result.addError("Sanitisation service failed.");
 				return result;
 			}
 
