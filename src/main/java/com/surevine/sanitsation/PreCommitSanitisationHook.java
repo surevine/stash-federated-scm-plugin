@@ -48,7 +48,7 @@ import java.nio.file.Paths;
  */
 public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
-    private static final Logger log = LoggerFactory.getLogger(PreCommitSanitisationHook.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PreCommitSanitisationHook.class);
     private static final String WORKING_DIR = "sanitisation";
 
     private final ApplicationPropertiesService applicationPropertiesService;
@@ -112,7 +112,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 			tempChangedFiles = getChangedFiles(context.getRepository(), commit);
 			changedFilesArchive = archiveWriter.createArchive(tempChangedFiles);
 		} catch (IOException | ArchiveException | CompressorException e1) {
-			log.error("Failed to create archive to sanitisation check.", e1);
+			LOG.error("Failed to create archive to sanitisation check.", e1);
 			return false;
 		}
 
@@ -123,7 +123,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 																	context.getRepository().getSlug(),
 																	commit.getId());
 		} catch (UnsupportedEncodingException e2) {
-			log.error("Failed to sanitise archive.", e2);
+			LOG.error("Failed to sanitise archive.", e2);
 			return false;
 		}
 
@@ -219,7 +219,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
     	try {
 			FileUtils.deleteDirectory(new File(tempFilesDir.toString()));
 		} catch (IOException e) {
-			log.warn("Failed to delete temporary working directory during sanitisation check: " + tempFilesDir.toString());
+			LOG.warn("Failed to delete temporary working directory during sanitisation check: " + tempFilesDir.toString(), e);
 		}
     }
 
@@ -251,8 +251,8 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
             deleteTempDir(context.getRepository(), commit);
             Files.deleteIfExists(changedFilesArchive);
         } catch (IOException e) {
-            log.error(String.format("Failed to delete commit changed files archive (%s).",
-                        changedFilesArchive.toString()));
+            LOG.error(String.format("Failed to delete commit changed files archive (%s).",
+                        changedFilesArchive.toString()), e);
         }
 	}
 

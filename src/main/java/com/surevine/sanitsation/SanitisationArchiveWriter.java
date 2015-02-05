@@ -14,16 +14,12 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Creates archives of files
  * @author jonnyheavey
  */
 public class SanitisationArchiveWriter {
-
-	private static final Logger log = LoggerFactory.getLogger(SanitisationArchiveWriter.class);
 
 	private Path tempDir;
 	private Path archivePath;
