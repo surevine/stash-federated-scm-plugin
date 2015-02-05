@@ -44,8 +44,7 @@ public class SanitisationServiceFacade {
 		try {
 			getConfig().load(getClass().getResourceAsStream("/sanitisation.properties"));
 		} catch (IOException e) {
-			log.warn("Failed to load sanitisation hook configuration.");
-			e.printStackTrace();
+			log.warn("Failed to load sanitisation hook configuration.", e);
 		}
 	}
 
