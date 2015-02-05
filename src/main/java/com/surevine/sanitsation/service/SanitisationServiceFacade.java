@@ -32,7 +32,7 @@ import com.surevine.sanitsation.SanitisationResult;
  */
 public class SanitisationServiceFacade {
 
-	private static final Logger log = LoggerFactory.getLogger(SanitisationServiceFacade.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SanitisationServiceFacade.class);
 	private static final int SUCCESS = 200;
 	private static final int NOT_FOUND = 404;
 
@@ -44,7 +44,7 @@ public class SanitisationServiceFacade {
 		try {
 			getConfig().load(getClass().getResourceAsStream("/sanitisation.properties"));
 		} catch (IOException e) {
-			log.warn("Failed to load sanitisation hook configuration.", e);
+			LOG.warn("Failed to load sanitisation hook configuration.", e);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class SanitisationServiceFacade {
 	 */
 	public SanitisationResult isSane(Path archiveToSanitise, String projectKey, String repoSlug, String identifier) throws UnsupportedEncodingException {
 
-		log.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
+		LOG.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
 
 		File archive = new File(archiveToSanitise.toString());
 
@@ -106,12 +106,14 @@ public class SanitisationServiceFacade {
 			try {
 				parseJSONResponse(result, responseString);
 			} catch (JSONException e) {
+				String error = "Failed to parse sanitisation service response.";
+				LOG.warn(error, e);
 				result.setSane(false);
-				result.addError("Failed to parse sanitisation service response.");
+				result.addError(error);
 			}
 
 		} catch (IOException e) {
-			log.error("Failed to send archive to sanitisation service.", e);
+			LOG.error("Failed to send archive to sanitisation service.", e);
 		}
 
 		return result;
