@@ -50,6 +50,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
     private static final Logger LOG = LoggerFactory.getLogger(PreCommitSanitisationHook.class);
     private static final String WORKING_DIR = "sanitisation";
+    private static final int PAGE_REQUEST_LIMIT = 9999;
 
     private final ApplicationPropertiesService applicationPropertiesService;
     private final CommitService commitService;
@@ -82,7 +83,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 																	                .include(refChange.getToHash())
 																	                .build();
 
-            final Page<Changeset> commits = commitService.getChangesetsBetween(request, PageUtils.newRequest(0, 9999));
+            final Page<Changeset> commits = commitService.getChangesetsBetween(request, PageUtils.newRequest(0, PAGE_REQUEST_LIMIT));
             for(Changeset commit: commits.getValues()) {
             	if(!isCommitSane(commit, context, hookResponse)) {
             		allCommitsSane = false;
@@ -147,7 +148,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 
         Set<Path> changedFiles = new HashSet<Path>();
         final ChangesRequest changesRequest = new ChangesRequest.Builder(repository, commit.getId()).build();
-        final Page<Change> changes = commitService.getChanges(changesRequest, PageUtils.newRequest(0, 9999));
+        final Page<Change> changes = commitService.getChanges(changesRequest, PageUtils.newRequest(0, PAGE_REQUEST_LIMIT));
 
         Path commitTempDir = createTempDir(repository, commit);
 
