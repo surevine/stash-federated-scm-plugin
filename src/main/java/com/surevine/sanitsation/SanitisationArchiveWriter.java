@@ -36,16 +36,19 @@ public class SanitisationArchiveWriter {
 	 * @throws ArchiveException
 	 * @throws CompressorException
 	 */
-	public Path createArchive(Set<Path> archiveContentFilePaths) throws IOException, ArchiveException, CompressorException {
+	public Path createArchive(Set<Path> archiveContentFilePaths) throws SanitisationException {
 
 		String uuid = UUID.randomUUID().toString();
         archivePath = Paths.get(tempDir.toString(), uuid + ".tar.gz");
         Path tarPath = Paths.get(tempDir.toString(), uuid + ".tar");
 
-        createTar(tarPath, archiveContentFilePaths);
-        writeGz(archivePath, tarPath);
-
-        Files.deleteIfExists(tarPath);
+        try {
+			createTar(tarPath, archiveContentFilePaths);
+			writeGz(archivePath, tarPath);
+			Files.deleteIfExists(tarPath);
+		} catch (IOException | ArchiveException | CompressorException e) {
+			throw new SanitisationException(e);
+		}
 
 		return archivePath;
 	}

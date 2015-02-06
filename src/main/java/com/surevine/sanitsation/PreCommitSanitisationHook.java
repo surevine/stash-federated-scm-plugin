@@ -112,8 +112,8 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         try {
 			tempChangedFiles = getChangedFiles(context.getRepository(), commit);
 			changedFilesArchive = archiveWriter.createArchive(tempChangedFiles);
-		} catch (IOException | ArchiveException | CompressorException e1) {
-			LOG.error("Failed to create archive to sanitisation check.", e1);
+		} catch (IOException | SanitisationException e) {
+			LOG.error("Failed to create archive to sanitisation check.", e);
 			return false;
 		}
 
@@ -123,8 +123,8 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 																	context.getRepository().getProject().getKey(),
 																	context.getRepository().getSlug(),
 																	commit.getId());
-		} catch (UnsupportedEncodingException e2) {
-			LOG.error("Failed to sanitise archive.", e2);
+		} catch (UnsupportedEncodingException e) {
+			LOG.error("Failed to sanitise archive.", e);
 			return false;
 		}
 
