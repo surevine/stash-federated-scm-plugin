@@ -101,17 +101,17 @@ public class SanitisationServiceFacade {
 			}
 
 			String responseString = IOUtils.toString(response.getEntity().getContent(), Charset.defaultCharset());
-			try {
-				parseJSONResponse(result, responseString);
-			} catch (JSONException e) {
-				String error = "Failed to parse sanitisation service response.";
-				LOG.warn(error, e);
-				result.setSane(false);
-				result.addError(error);
-			}
+			parseJSONResponse(result, responseString);
 
+		} catch (JSONException e) {
+			String errorMessage = "Failed to parse sanitisation service response.";
+			result.setSane(false);
+			result.addError(errorMessage);
+			LOG.warn(errorMessage, e);
 		} catch (IOException e) {
-			LOG.error("Failed to send archive to sanitisation service.", e);
+			String errorMessage = "Failed to send archive to sanitisation service.";
+			result.addError(errorMessage);
+			LOG.error(errorMessage, e);
 		}
 
 		return result;
