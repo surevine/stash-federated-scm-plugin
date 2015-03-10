@@ -132,7 +132,7 @@ public class SanitisationServiceFacade {
 		JSONObject responseBody;
 
 			responseBody = new JSONObject(responseString);
-			result.setSane((boolean) responseBody.get("safe"));
+			result.setSane((boolean) responseBody.get("sane"));
 
 			JSONArray errorsArray = (JSONArray) responseBody.get("errors");
 			for(int i=0; i<errorsArray.length(); i++) {
