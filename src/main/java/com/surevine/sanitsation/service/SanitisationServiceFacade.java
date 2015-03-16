@@ -63,7 +63,7 @@ public class SanitisationServiceFacade {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public SanitisationResult isSane(Path archiveToSanitise, String projectKey, String repoSlug, String identifier) throws UnsupportedEncodingException {
+	public SanitisationResult isSane(Path archiveToSanitise, String commitMessage, String projectKey, String repoSlug, String identifier) throws UnsupportedEncodingException {
 
 		LOG.info("Sending archive to sanitisation service: " + archiveToSanitise.toString());
 
@@ -71,9 +71,10 @@ public class SanitisationServiceFacade {
 
 		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		entity.addPart("archive", new FileBody(archive));
-		entity.addPart("projectKey", new StringBody(projectKey));
-		entity.addPart("repoSlug", new StringBody(repoSlug));
-		entity.addPart("identifier", new StringBody("Commit-"+identifier));
+		entity.addPart("commitMessage", new StringBody(commitMessage));
+		entity.addPart("repoType", new StringBody("SCM"));
+		entity.addPart("repoIdentifier", new StringBody(projectKey + "/" + repoSlug));
+		entity.addPart("sanitisationIdentifier", new StringBody("SCM-commit-"+identifier));
 
 		String url = getConfig().getProperty("sanitisation.service.base.url") + "/sanitise";
 
@@ -131,7 +132,7 @@ public class SanitisationServiceFacade {
 		JSONObject responseBody;
 
 			responseBody = new JSONObject(responseString);
-			result.setSane((boolean) responseBody.get("safe"));
+			result.setSane((boolean) responseBody.get("sane"));
 
 			JSONArray errorsArray = (JSONArray) responseBody.get("errors");
 			for(int i=0; i<errorsArray.length(); i++) {

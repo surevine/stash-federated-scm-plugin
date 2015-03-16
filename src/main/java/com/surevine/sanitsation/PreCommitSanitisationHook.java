@@ -118,6 +118,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         SanitisationResult result;
 		try {
 			result = SanitisationServiceFacade.getInstance().isSane(changedFilesArchive,
+																	commit.getMessage(),
 																	context.getRepository().getProject().getKey(),
 																	context.getRepository().getSlug(),
 																	commit.getId());
