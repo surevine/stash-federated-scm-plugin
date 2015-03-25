@@ -4,13 +4,13 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}"/>
-        <param name="plugin-icon">images/surevine-icon.png</param>
-        <param name="plugin-logo">images/surevine-logo.png</param>
+        <param name="plugin-icon">images/pluginIcon.png</param>
+        <param name="plugin-logo">images/pluginLogo.png</param>
     </plugin-info>
 
     <repository-hook key="sanitiseCommits" name="Community Portal Pre-Commit Sanitisation Hook" class="com.surevine.sanitsation.PreCommitSanitisationHook">
         <description>Hook to validate commits pushed to a repository being federated to external partners via Community Portal. Commits that don't meet requirements are rejected.</description>
-     	<icon>images/surevine-logo.png</icon>
+     	<icon>images/pluginLogo.png</icon>
     </repository-hook>
 
 </atlassian-plugin>
