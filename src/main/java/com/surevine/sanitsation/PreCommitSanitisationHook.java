@@ -235,7 +235,7 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
 		                            commit.getDisplayId(),
 		                            commit.getAuthor().getName()));
 		for(String error: result.getErrors()) {
-			hookResponse.out().println("Error: "+error.trim());
+			hookResponse.out().println(error.trim());
 		}
 	}
 
