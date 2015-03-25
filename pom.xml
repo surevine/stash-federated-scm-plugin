@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.surevine</groupId>
     <artifactId>stash-federated-scm-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <organization>
         <name>Surevine</name>
         <url>https://www.surevine.com/</url>
     </organization>
-    <name>stash-federated-scm-plugin</name>
-    <description>Community portal federated SCM plugin for Atlassian Stash.</description>
+    <name>Community Portal Sanitisation Plugin</name>
+    <description>This plugin validates commits pushed to a repository that is being federated to external partners via the community portal.</description>
     <!-- <packaging>atlassian-plugin</packaging> -->
     <repositories>
         <repository>
