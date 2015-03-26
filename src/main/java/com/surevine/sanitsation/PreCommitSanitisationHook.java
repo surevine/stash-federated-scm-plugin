@@ -187,7 +187,11 @@ public class PreCommitSanitisationHook implements PreReceiveRepositoryHook {
         String uuid = UUID.randomUUID().toString();
         Path tempFilePath = Paths.get(directory.toString(), uuid + ".txt");
 
-        outputStream.writeTo(Files.newOutputStream(tempFilePath));
+        try {
+        	outputStream.writeTo(Files.newOutputStream(tempFilePath));
+        } finally {
+        	outputStream.close();
+        }
 
         return tempFilePath;
     }
